@@ -1,16 +1,23 @@
-# This is a sample Python script.
+from CustomHashMap import *
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-
-
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
-
-
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    print_hi('PyCharm')
+    symbolTable = CustomHashMap(8)
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    symbolTable.add("a")
+    symbolTable.add("b")
+    symbolTable.add("dog")
+    symbolTable.add("bear")
+    symbolTable.add("pear")
+    symbolTable.add("sparta")
+    symbolTable.add("wok")
+    symbolTable.add("bottle")
+    symbolTable.add("cat")
+    symbolTable.add("cat")
+
+    print(symbolTable.search("a"))
+    print(symbolTable.search("dog"))
+    print(symbolTable.search("wok"))
+
+    print(symbolTable.search("asdasd"))
+
+
