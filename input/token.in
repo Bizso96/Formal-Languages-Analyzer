@@ -1,0 +1,4 @@
+reserved_words: character, string, integer, list, dictionary, if, else, elif, while
+separators: ";"
+operators: "+", "-", "*", "/", "%", "<-", "and", "or", "==", "!=", "<=", ">=", "<", ">"
+

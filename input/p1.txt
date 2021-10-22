@@ -1,0 +1,35 @@
+enter
+	integer a;
+	a <- 6;
+	integer b;
+	b <- 9;
+	integer c;
+	c <- 5 + 6;
+	
+	integer maximum;
+    
+    if(a > b)
+    {
+        if(a > c)
+        {
+            maximum <- a;
+        }
+        else
+        {
+            maximum <- c;
+        };      
+    }
+    else
+    {
+        if(b > c)
+        {
+            maximum <- b;
+        }
+        else
+        {
+            maximum <- c;
+        }
+    };
+    
+    write(maximum);
+exit
