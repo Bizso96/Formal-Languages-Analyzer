@@ -1,2 +1,121 @@
 Token | ST/CT position
 enter - None
+integer - None
+a - (8, 0)
+; - None
+a - (8, 0)
+<- - None
+6 - (8, 0)
+; - None
+integer - None
+b - (8, 1)
+; - None
+b - (8, 1)
+<- - None
+9 - (7, 0)
+; - None
+integer - None
+c - (4, 0)
+; - None
+c - (4, 0)
+<- - None
+5 - (4, 0)
++ - None
+6 - (8, 0)
++ - None
+2 - (0, 0)
+; - None
+a - (8, 0)
+<- - None
+b - (8, 1)
+[ - None
+2 - (0, 0)
+] - None
+; - None
+string - None
+s - (3, 0)
+; - None
+s - (3, 0)
+<- - None
+"Once upon a midnight dreary" - (4, 1)
+; - None
+character - None
+ch - (9, 0)
+; - None
+ch - (9, 0)
+<- - None
+'m' - (3, 0)
+; - None
+integer - None
+maximum - (4, 1)
+; - None
+if - None
+( - None
+a - (8, 0)
+> - None
+b - (8, 1)
+) - None
+{ - None
+if - None
+( - None
+a - (8, 0)
+> - None
+c - (4, 0)
+) - None
+{ - None
+maximum - (4, 1)
+<- - None
+a - (8, 0)
+; - None
+} - None
+elif - None
+( - None
+c - (4, 0)
+> - None
+b - (8, 1)
+) - None
+{ - None
+maximum - (4, 1)
+<- - None
+c - (4, 0)
+; - None
+} - None
+else - None
+{ - None
+maximum - (4, 1)
+<- - None
+b - (8, 1)
+; - None
+} - None
+; - None
+} - None
+else - None
+{ - None
+if - None
+( - None
+b - (8, 1)
+> - None
+c - (4, 0)
+) - None
+{ - None
+maximum - (4, 1)
+<- - None
+b - (8, 1)
+; - None
+} - None
+else - None
+{ - None
+maximum - (4, 1)
+<- - None
+c - (4, 0)
+; - None
+} - None
+; - None
+} - None
+; - None
+write - None
+( - None
+maximum - (4, 1)
+) - None
+; - None
+exit - None

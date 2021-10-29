@@ -99,6 +99,11 @@ class CustomHashMap:
         return self._capacity
 
     def _gethash(self, value):
+        if isinstance(value, list):
+            listHash = 0
+            for element in value:
+                listHash += self._gethash(element)
+            return listHash % self._capacity
         return int(hashlib.sha1(value.encode("utf-8")).hexdigest(), 16) % self._capacity
 
     def search(self, value):

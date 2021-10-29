@@ -31,18 +31,18 @@ class LexicalAnalyzer:
             "character": self.checkDeclaration,
             "string": self.checkDeclaration,
             "boolean": self.checkDeclaration,
-            "list": self.notImplemented,
+            "list": self.checkDeclaration,
             "dictionary": self.notImplemented,
             "if": self.checkIfAction,
             "while": self.checkWhileAction
         }
 
         self.typeMapping = {
-            "integer": self.checkIntegerConstant,
-            "character": self.checkCharacterConstant,
-            "string": self.checkStringConstant,
-            "boolean": self.checkBooleanConstant,
-            "list": self.notImplemented,
+            "integer": self.validateIntegerConstant,
+            "character": self.validateCharacterConstant,
+            "string": self.validateStringConstant,
+            "boolean": self.validateBooleanConstant,
+            "list": self.checkListConstant,
             "dictionary": self.notImplemented
         }
 
@@ -115,7 +115,6 @@ class LexicalAnalyzer:
         self.assignment_operators = token_file.readline().split(":")[1].replace('"', '').replace(' ', '').strip().split(",")
 
     def tokenize(self):
-        print('(' + '\".*\" |' + '[' + r'\s' + '\\'.join(self.separators) + '])')
         rePattern = re.compile('(' + '\".*\"|' + '[' + r'\s' + '\\'.join(self.separators) + '])')
         l = 0
         for line in self.fileContent:
@@ -154,7 +153,7 @@ class LexicalAnalyzer:
         else:
             if self.symbolTable.search(self.currentToken()) is None:
                 raise LexicalError(self.currentLine(), "Unknown token - " + self.currentToken())
-            if self.tokenIndex + 1 < len(self.tokens) and self.tokens[self.tokenIndex + 1].value in self.assignment_operators:
+            if self.tokenIndex + 1 < len(self.tokens) and self.nextToken() in self.assignment_operators:
                 self.programInternalForm.append(PIFPair(self.currentToken(), self.symbolTable.search(self.currentToken())))
                 self.tokenIndex += 1
                 self.checkAssignment()
@@ -186,32 +185,65 @@ class LexicalAnalyzer:
 
     # region Language Elements
 
-    def checkVariable(self, value):
+    def validateVariable(self, value):
         return value not in self.reservedWords and re.fullmatch(r'[a-zA-Z][a-zA-Z0-9]*', value)
 
-    def checkTypeName(self, value):
+    def validateTypeName(self, value):
         return value in self.typeNames
 
-    def checkIntegerConstant(self, value):
+    def validateIntegerConstant(self, value):
         return re.fullmatch(r'[-+]?[1-9][0-9]*|0', value) is not None
 
-    def checkBooleanConstant(self, value):
+    def validateBooleanConstant(self, value):
         return value in ["true", "false"]
 
-    def checkCharacterConstant(self, value):
+    def validateCharacterConstant(self, value):
         return re.fullmatch(r"\'[0-9a-zA-Z!?$@&.]\'", value) is not None
 
-    def checkStringConstant(self, value):
+    def validateStringConstant(self, value):
         return re.fullmatch(r'\"[a-zA-Z0-9!?$@&.\s]*\"', value) is not None
 
-    def checkListConstant(self, value):
-        return False;
+    def checkListConstant(self):
+        if self.currentToken() != "[":
+            raise LexicalError(self.currentLine(), "Expecting list constant")
 
-    def checkDictionaryConstant(self, value):
+        self.programInternalForm.append(PIFPair(self.currentToken(), None))
+        listConstant = []
+
+        self.tokenIndex += 1
+        while self.identifyConstant():
+            listConstant.append(self.currentToken())
+            self.tokenIndex += 1
+
+        position = self.constantTable.search(listConstant)
+
+        if position is None:
+            ct_hash, list_position = self.constantTable.add(listConstant)
+        else:
+            ct_hash, list_position = position
+
+        self.programInternalForm.append(PIFPair(listConstant, (ct_hash, list_position)))
+
+        if self.currentToken() != "]":
+            raise LexicalError(self.currentLine(), "List constant not closed")
+
+        self.programInternalForm.append(PIFPair(self.currentToken(), None))
+
+    def checkDictionaryConstant(self):
         return False
 
-    def checkConstant(self, value):
-        return self.checkIntegerConstant(value) or self.checkBooleanConstant(value) or self.checkCharacterConstant(value) or self.checkStringConstant(value)
+    def identifyConstant(self):
+        if self.currentToken() == '[':
+            return "list"
+        if self.validateIntegerConstant(self.currentToken()):
+            return "integer"
+        if self.validateBooleanConstant(self.currentToken()):
+            return "boolean"
+        if self.validateCharacterConstant(self.currentToken()):
+            return "character"
+        if self.validateStringConstant(self.currentToken()):
+            return "string"
+        return None
 
     # Enter keyword
     def checkProgram(self):
@@ -232,7 +264,6 @@ class LexicalAnalyzer:
             if self.currentToken() == "exit" or self.currentToken() == "}":
                 return
             self.checkAction()
-            self.tokenIndex += 1
 
         raise LexicalError(self.tokens[self.tokenIndex - 1].line, "Missing action list closing token")
 
@@ -242,6 +273,7 @@ class LexicalAnalyzer:
             raise LexicalError(self.currentLine(), "Missing semicolon")
 
         self.programInternalForm.append(PIFPair(self.currentToken(), None))
+        self.tokenIndex += 1
 
     def checkDeclaration(self):
         if self.currentToken() not in self.typeNames:
@@ -253,7 +285,7 @@ class LexicalAnalyzer:
         if self.endOfProgram():
             raise LexicalError(self.currentLine() - 1, "Missing variable declaration")
 
-        if not self.checkVariable(self.currentToken()):
+        if not self.validateVariable(self.currentToken()):
             raise LexicalError(self.currentLine(), "Wrong variable format")
 
         if self.symbolTable.search(self.currentToken()) is None:
@@ -274,8 +306,9 @@ class LexicalAnalyzer:
         self.checkExpression()
 
     def checkExpression(self):
-        if self.checkConstant(self.currentToken()) or self.symbolTable.search(self.currentToken()) is not None:
-            if self.checkConstant(self.currentToken()):
+        constant = self.identifyConstant()
+        if constant is not None or self.symbolTable.search(self.currentToken()) is not None:
+            if constant in ["integer", "boolean", "character", "string"]:
                 position = self.constantTable.search(self.currentToken())
 
                 if position is None:
@@ -284,6 +317,8 @@ class LexicalAnalyzer:
                     ct_hash, list_position = position
 
                 self.programInternalForm.append(PIFPair(self.currentToken(), (ct_hash, list_position)))
+            elif constant == "list":
+                self.checkListConstant()
             else:
                 self.programInternalForm.append(PIFPair(self.currentToken(), self.symbolTable.search(self.currentToken())))
                 if self.nextToken() == "[":

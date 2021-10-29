@@ -11,9 +11,9 @@ enter
 	string s;
 	s <- "Once upon a midnight dreary";
 
-	character char;
-	char <- 'm';
-	
+	character ch;
+	ch <- 'm';
+
 	integer maximum;
 
     if(a > b)
@@ -22,9 +22,13 @@ enter
         {
             maximum <- a;
         }
-        else
+        elif(c > b)
         {
             maximum <- c;
+        }
+        else
+        {
+            maximum <- b;
         };
     }
     else
@@ -33,13 +37,9 @@ enter
         {
             maximum <- b;
         }
-        elif(c > b)
-        {
-            maximum <- c;
-        }
         else
         {
-            maximum <- 99;
+            maximum <- c;
         };
     };
     

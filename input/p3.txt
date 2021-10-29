@@ -1,6 +1,6 @@
 enter
     list l;
-    l <- [3 6 8 9 2 6 3];
+    l <- [3 6 8 9 'a' 6 3];
     integer n;
     n <- 7;
     
@@ -13,7 +13,7 @@ enter
     {
         sum <- sum + l[i];
         i <- i + 1;
-    }
+    };
     
     write(sum);
 exit
