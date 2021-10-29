@@ -1,47 +1,13 @@
 enter
 	integer a;
-	a <- 6;
+	a <- 45;
+
 	integer b;
-	b <- 9;
-	integer c;
-	c <- 5 + 6 + 2;
+	b <- 90;
 
-    a <- b[2];
+	a <- a + b;
 
-	string s;
-	s <- "Once upon a midnight dreary";
-
-	character ch;
-	ch <- 'm';
-
-	integer maximum;
-
-    if(a > b)
-    {
-        if(a > c)
-        {
-            maximum <- a;
-        }
-        elif(c > b)
-        {
-            maximum <- c;
-        }
-        else
-        {
-            maximum <- b;
-        };
-    }
-    else
-    {
-        if(b > c)
-        {
-            maximum <- b;
-        }
-        else
-        {
-            maximum <- c;
-        };
-    };
-    
-    write(maximum);
+	if(a % 2 == 0){
+	write(a);
+	};
 exit
