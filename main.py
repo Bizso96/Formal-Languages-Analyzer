@@ -1,23 +1,16 @@
 from CustomHashMap import *
+from LexicalAnalyzer import LexicalAnalyzer
 
 if __name__ == '__main__':
-    symbolTable = CustomHashMap(8)
+    lexical_analyzer = LexicalAnalyzer()
+    lexical_analyzer.open_file("p1.txt")
+    lexical_analyzer.read_tokens_input("token.in")
 
-    symbolTable.add("a")
-    symbolTable.add("b")
-    symbolTable.add("dog")
-    symbolTable.add("bear")
-    symbolTable.add("pear")
-    symbolTable.add("sparta")
-    symbolTable.add("wok")
-    symbolTable.add("bottle")
-    symbolTable.add("cat")
-    symbolTable.add("cat")
+    lexical_analyzer.close_file()
 
-    print(symbolTable.search("a"))
-    print(symbolTable.search("dog"))
-    print(symbolTable.search("wok"))
+    lexical_analyzer.tokenize()
 
-    print(symbolTable.search("asdasd"))
+    #for t in lexical_analyzer.tokens:
+    #    print(t)
 
-
+    lexical_analyzer.analyze()

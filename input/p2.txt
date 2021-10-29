@@ -1,0 +1,31 @@
+enter
+	integer a;
+	a <- 11;
+	boolean prime;
+	prime <- true;
+
+    character c;
+    c <- 'm';
+
+	integer i;
+	i <- 2;
+
+	while (i <= a / 2)
+	{
+		if (a % i == 0)
+		{
+			prime <- false;
+		};
+
+		i <- i + 1;
+	};
+
+    if (prime)
+    {
+        write("Prime number");
+    }
+    else
+    {
+        write("Not a prime number");
+    };
+exit

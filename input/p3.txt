@@ -1,0 +1,19 @@
+enter
+    list l;
+    l <- [3 6 8 9 'a' 6 3];
+    integer n;
+    n <- 7;
+    
+    integer sum;
+    sum <- 0;
+    
+    integer i;
+    i <- 0;
+    while (i < n)
+    {
+        sum <- sum + l[i];
+        i <- i + 1;
+    };
+    
+    write(sum);
+exit

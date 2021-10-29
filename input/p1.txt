@@ -1,0 +1,13 @@
+enter
+	integer a;
+	a <- 45;
+
+	integer b;
+	b <- 90;
+
+	a <- a + b;
+
+	if(a % 2 == 0){
+	write(a);
+	};
+exit

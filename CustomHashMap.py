@@ -44,6 +44,8 @@ class LinkedList:
             self._tail = new_node
             self._size += 1
 
+        return self.size - 1
+
     def search(self, value):
         if self.size == 0:
             return None
@@ -70,6 +72,19 @@ class LinkedList:
 
         return current.value
 
+    def toList(self):
+        if self.size == 0:
+            return []
+
+        current = self._head
+        list = [current.value]
+
+        while current.nextNode is not None:
+            current = current.nextNode
+            list.append(current.value)
+
+        return list
+
 
 class CustomHashMap:
     def __init__(self, capacity):
@@ -79,7 +94,16 @@ class CustomHashMap:
         self._hashmap = [None] * capacity
         self._capacity = capacity
 
+    @property
+    def capacity(self):
+        return self._capacity
+
     def _gethash(self, value):
+        if isinstance(value, list):
+            listHash = 0
+            for element in value:
+                listHash += self._gethash(element)
+            return listHash % self._capacity
         return int(hashlib.sha1(value.encode("utf-8")).hexdigest(), 16) % self._capacity
 
     def search(self, value):
@@ -95,13 +119,20 @@ class CustomHashMap:
 
     def add(self, value):
         if self.search(value) is not None:
-            return False
+            return None
 
         value_hash = self._gethash(value)
 
         if self._hashmap[value_hash] is None:
             self._hashmap[value_hash] = LinkedList()
 
-        self._hashmap[value_hash].add(value)
+        list_position = self._hashmap[value_hash].add(value)
 
-        return True
+        return value_hash, list_position
+
+    def get(self, index):
+        if index < self._capacity:
+            if self._hashmap[index] is None:
+                return None
+
+            return self._hashmap[index].toList()
