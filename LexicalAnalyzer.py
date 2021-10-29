@@ -17,6 +17,7 @@ class LexicalAnalyzer:
         self.fileContent = []
         self.reservedWords = []
         self.typeNames = []
+        self.functions = []
         self.separators = []
         self.arithmetic_operators = []
         self.logical_operators = []
@@ -32,7 +33,8 @@ class LexicalAnalyzer:
             "boolean": self.checkDeclaration,
             "list": self.notImplemented,
             "dictionary": self.notImplemented,
-
+            "if": self.checkIfAction,
+            "while": self.checkWhileAction
         }
 
         self.typeMapping = {
@@ -93,10 +95,6 @@ class LexicalAnalyzer:
 
         CTFile.close()
 
-
-
-
-
         return True
 
     def get_file_content(self):
@@ -109,7 +107,8 @@ class LexicalAnalyzer:
 
         self.reservedWords = token_file.readline().split(":")[1].replace(' ', '').strip().split(",")
         self.typeNames = token_file.readline().split(":")[1].replace(' ', '').strip().split(",")
-        self.separators = token_file.readline().split(":")[1].replace('"', '').replace(' ', '').strip().split(",")
+        self.functions = token_file.readline().split(":")[1].replace(' ', '').strip().split(",")
+        self.separators = token_file.readline().split(":")[1].replace('"', '').strip().split(", ")
         self.arithmetic_operators = token_file.readline().split(":")[1].replace('"', '').replace(' ', '').strip().split(",")
         self.logical_operators = token_file.readline().split(":")[1].replace('"', '').replace(' ', '').strip().split(",")
         self.relational_operators = token_file.readline().split(":")[1].replace('"', '').replace(' ', '').strip().split(",")
@@ -148,7 +147,11 @@ class LexicalAnalyzer:
         if self.tokenIndex >= len(self.tokens):
             return
 
-        if self.currentToken() not in self.reservedWords:
+        if self.currentToken() in self.reservedWords:
+            self.functionMapping[self.currentToken()]()
+        elif self.currentToken() in self.functions:
+            self.checkFunction()
+        else:
             if self.symbolTable.search(self.currentToken()) is None:
                 raise LexicalError(self.currentLine(), "Unknown token - " + self.currentToken())
             if self.tokenIndex + 1 < len(self.tokens) and self.tokens[self.tokenIndex + 1].value in self.assignment_operators:
@@ -157,8 +160,6 @@ class LexicalAnalyzer:
                 self.checkAssignment()
             else:
                 self.checkExpression()
-        else:
-            self.functionMapping[self.currentToken()]()
 
     def currentToken(self):
         return self.tokens[self.tokenIndex].value
@@ -192,7 +193,7 @@ class LexicalAnalyzer:
         return value in self.typeNames
 
     def checkIntegerConstant(self, value):
-        return re.fullmatch(r'[-+]?[1-9][0-9]*', value) is not None
+        return re.fullmatch(r'[-+]?[1-9][0-9]*|0', value) is not None
 
     def checkBooleanConstant(self, value):
         return value in ["true", "false"]
@@ -303,10 +304,112 @@ class LexicalAnalyzer:
                 self.checkExpression()
 
         else:
-            raise LexicalError(self.currentLine(), "Unexpected element in expression")
+            raise LexicalError(self.currentLine(), "Unknown element in expression: " + self.currentToken())
 
+    def checkIfAction(self):
+        if self.currentToken() != "if":
+            raise LexicalError(self.currentLine(), "Expecting if action")
 
+        self.programInternalForm.append(PIFPair(self.currentToken(), None))
+        self.tokenIndex += 1
+        self.checkCondition()
+        self.checkActionBlock()
 
+        if self.currentToken() == "elif":
+            self.checkElifComponent()
+
+        if self.currentToken() == "else":
+            self.programInternalForm.append(PIFPair(self.currentToken(), None))
+            self.tokenIndex += 1
+            self.checkActionBlock()
+
+    def checkCondition(self):
+        if self.currentToken() != "(":
+            raise LexicalError(self.currentLine(), "Expecting condition")
+
+        self.programInternalForm.append(PIFPair(self.currentToken(), None))
+        self.tokenIndex += 1
+        self.checkLogicalExpression()
+
+        if self.currentToken() != ")":
+            raise LexicalError(self.currentLine(), "Expecting condition closing token")
+
+        self.programInternalForm.append(PIFPair(self.currentToken(), None))
+        self.tokenIndex += 1
+
+    def checkElifComponent(self):
+        if self.currentToken() != "elif":
+            raise LexicalError(self.currentLine(), "Expecting elif component")
+
+        self.programInternalForm.append(PIFPair(self.currentToken(), None))
+        self.tokenIndex += 1
+        self.checkCondition()
+        self.checkActionBlock()
+
+        if self.currentToken() == "elif":
+            self.checkElifComponent()
+
+    def checkLogicalExpression(self):
+        self.checkExpression()
+        if self.currentToken() in self.logical_operators:
+            self.programInternalForm.append(PIFPair(self.currentToken(), None))
+            self.tokenIndex += 1
+            self.checkLogicalExpression()
+        elif self.currentToken() in self.relational_operators:
+            self.programInternalForm.append(PIFPair(self.currentToken(), None))
+            self.tokenIndex += 1
+            self.checkExpression()
+
+    def checkWhileAction(self):
+        if self.currentToken() != "while":
+            raise LexicalError(self.currentLine(), "Expecting while action")
+
+        self.programInternalForm.append(PIFPair(self.currentToken(), None))
+        self.tokenIndex += 1
+
+        self.checkCondition()
+        self.checkActionBlock()
+
+    def checkActionBlock(self):
+        if self.currentToken() != "{":
+            raise LexicalError(self.currentLine(), "Expecting action block")
+        self.programInternalForm.append(PIFPair(self.currentToken(), None))
+
+        self.tokenIndex += 1
+        self.checkActionList()
+
+        if self.currentToken() != "}":
+            raise LexicalError(self.currentLine(), "Expecting action block closing token")
+        self.programInternalForm.append(PIFPair(self.currentToken(), None))
+        self.tokenIndex += 1
+
+    def checkFunction(self):
+        if self.currentToken() not in self.functions:
+            raise LexicalError(self.currentLine(), "Unknown function " + self.currentToken())
+
+        self.programInternalForm.append(PIFPair(self.currentToken(), None))
+        self.tokenIndex += 1
+
+        if self.currentToken() != "(":
+            raise LexicalError(self.currentLine(), "Expecting list of parameters")
+
+        self.programInternalForm.append(PIFPair(self.currentToken(), None))
+        self.tokenIndex += 1
+
+        self.checkParameterList()
+
+        if self.currentToken() != ")":
+            raise LexicalError(self.currentLine(), "Parameter list not closed")
+
+        self.programInternalForm.append(PIFPair(self.currentToken(), None))
+        self.tokenIndex += 1
+
+    def checkParameterList(self):
+        self.checkExpression()
+        if self.currentToken() == ",":
+            self.programInternalForm.append(PIFPair(self.currentToken(), None))
+            self.tokenIndex += 1
+            self.checkParameterList()
 
     def notImplemented(self):
         print("Not implemented")
