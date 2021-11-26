@@ -1,13 +1,13 @@
 Position | Tokens
 0 None
 1 None
-2 None
-3 None
-4 None
+2 - ['i']
+3 - ['prime']
+4 - ['c']
 5 None
 6 None
 7 None
-8 - ['a', 'b']
+8 - ['a']
 9 None
 10 None
 11 None
